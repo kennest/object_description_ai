@@ -1,3 +1,4 @@
+import os
 import cv2
 import base64
 from langchain_core.messages import HumanMessage
@@ -5,8 +6,10 @@ from utils.prompts import LLAVA_PROMPT
 
 from langchain_ollama import ChatOllama
 
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+
 llava = ChatOllama(
-    base_url="http://127.0.0.1:11434",
+    base_url=OLLAMA_HOST,
     model="llava:7b",
     temperature=0.1
 )
