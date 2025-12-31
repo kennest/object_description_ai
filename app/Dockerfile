@@ -14,8 +14,8 @@ RUN apt-get update --fix-missing && \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.docker.txt .
-RUN pip install --no-cache-dir -r requirements.docker.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Create Ultralytics config directory
 RUN mkdir -p /tmp/Ultralytics && chmod 777 /tmp/Ultralytics

@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      context: .
+      context: ./app
       dockerfile: Dockerfile
     container_name: fastapi-llava
     restart: unless-stopped
