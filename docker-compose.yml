@@ -10,6 +10,7 @@ services:
       - ./yolov8n.pt:/app/yolov8n.pt
     environment:
       - OLLAMA_HOST=http://host.docker.internal:11434
+      - YOLO_CONFIG_DIR=/tmp/Ultralytics
     expose:
       - "8000"
     networks:
