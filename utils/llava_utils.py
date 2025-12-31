@@ -2,7 +2,7 @@ import os
 import cv2
 import base64
 from langchain_core.messages import HumanMessage
-from utils.prompts import LLAVA_PROMPT
+from utils.prompts import LLAVA_PROMPT, LLAVA_PROMPT_WITH_ITEM
 
 from langchain_ollama import ChatOllama
 
@@ -26,10 +26,15 @@ def crop_to_base64(image_bgr, bbox):
     return base64.b64encode(buffer).decode("utf-8")
 
 
-def describe_with_llava(image_base64):
+def describe_with_llava(image_base64, item_name: str = None):
+    if item_name:
+        prompt = LLAVA_PROMPT_WITH_ITEM.format(item_name=item_name)
+    else:
+        prompt = LLAVA_PROMPT
+    
     message = HumanMessage(
         content=[
-            {"type": "text", "text": LLAVA_PROMPT},
+            {"type": "text", "text": prompt},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
         ]
     )

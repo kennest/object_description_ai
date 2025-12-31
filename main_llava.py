@@ -3,7 +3,8 @@ import cv2
 import time
 import numpy as np
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from typing import Optional
 from PIL import Image
 from ultralytics import YOLO
 from utils.llava_utils import crop_to_base64, describe_with_llava
@@ -34,7 +35,10 @@ yolo = YOLO("yolov8n.pt")
 # Endpoint
 # =========================
 @app.post("/analyze-image")
-async def analyze_image(file: UploadFile = File(...)):
+async def analyze_image(
+    file: UploadFile = File(...),
+    item_name: Optional[str] = Form(None, description="Nom de l'article pour affiner la description")
+):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Image invalide")
 
@@ -69,7 +73,7 @@ async def analyze_image(file: UploadFile = File(...)):
             # LLaVA description
             # =========================
             llava_start = time.time()
-            description = describe_with_llava(image_b64)
+            description = describe_with_llava(image_b64, item_name)
             llava_time = time.time() - llava_start
 
             objects.append({
