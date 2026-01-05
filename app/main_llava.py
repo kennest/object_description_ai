@@ -24,6 +24,17 @@ app = FastAPI(title="YOLO + LLaVA Vision API", version="1.0")
 #yolo = YOLO("../yolov8n.pt")
 #yolo = YOLO("yolo12n.pt")
 yolo = YOLO("yolov8s-worldv2.pt")
+
+# Classes personnalisées pour YOLO-World (open-vocabulary)
+CUSTOM_CLASSES = [
+    "pen", "pencil", "marker", "highlighter", "ballpoint pen",
+    "bottle", "cup", "phone", "keyboard", "mouse", "book", "notebook",
+    "scissors", "stapler", "ruler", "eraser", "paper", "card",
+    "watch", "glasses", "keys", "wallet", "bag", "box",
+    "person", "hand", "face", "object"
+]
+yolo.set_classes(CUSTOM_CLASSES)
+
 # =========================
 # LLaVA via Ollama
 # =========================
@@ -40,6 +51,7 @@ async def analyze_image(
     file: UploadFile = File(...),
     item_name: Optional[str] = Form(None, description="Nom de l'article pour affiner la description")
 ):
+    print(f"Received file: {file.filename}, content_type: {file.content_type}")
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Image invalide")
 
@@ -58,7 +70,8 @@ async def analyze_image(
     yolo_time = time.time() - yolo_start
 
     objects = []
-
+    print(f"YOLO detected {len(results)} results.")
+    print(f"YOLO detected {len(results[0].boxes)} objects.")
     for r in results:
         for box in r.boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
