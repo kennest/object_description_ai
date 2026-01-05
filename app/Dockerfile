@@ -24,7 +24,7 @@ RUN mkdir -p /tmp/Ultralytics && chmod 777 /tmp/Ultralytics
 COPY . .
 
 # Expose port
-EXPOSE 8000
+EXPOSE 7100
 
 # Run the application
-CMD ["uvicorn", "main_llava:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main_llava:app", "--host", "0.0.0.0", "--port", "7100"]

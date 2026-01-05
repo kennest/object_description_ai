@@ -12,7 +12,7 @@ services:
       - OLLAMA_HOST=http://host.docker.internal:11434
       - YOLO_CONFIG_DIR=/tmp/Ultralytics
     expose:
-      - "8000"
+      - "7100"
     networks:
       - app-network
     extra_hosts:
