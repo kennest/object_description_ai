@@ -22,7 +22,8 @@ app = FastAPI(title="YOLO + LLaVA Vision API", version="1.0")
 # YOLOv8 CPU
 # =========================
 #yolo = YOLO("../yolov8n.pt")
-yolo = YOLO("yolo12n.pt")
+#yolo = YOLO("yolo12n.pt")
+yolo = YOLO("yolov8s-worldv2.pt")
 # =========================
 # LLaVA via Ollama
 # =========================
