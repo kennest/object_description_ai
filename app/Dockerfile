@@ -3,7 +3,7 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Install system dependencies for OpenCV
+# Install system dependencies for OpenCV and git for pip packages
 RUN apt-get update --fix-missing && \
     apt-get install -y --no-install-recommends \
     libgl1 \
@@ -11,6 +11,7 @@ RUN apt-get update --fix-missing && \
     libsm6 \
     libxext6 \
     libxrender1 \
+    git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
