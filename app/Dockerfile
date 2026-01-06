@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1.4
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
@@ -13,9 +14,18 @@ RUN apt-get update --fix-missing && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
+# Upgrade pip for faster dependency resolution
+RUN pip install --upgrade pip
+
+# Install heavy dependencies first (better layer caching)
+# These rarely change, so they'll be cached most of the time
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# Copy and install remaining requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
 
 # Create Ultralytics config directory
 RUN mkdir -p /tmp/Ultralytics && chmod 777 /tmp/Ultralytics
