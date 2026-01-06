@@ -12,6 +12,7 @@ RUN apt-get update --fix-missing && \
     libxext6 \
     libxrender1 \
     git \
+    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
