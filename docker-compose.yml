@@ -9,6 +9,7 @@ services:
       - "11434:11434"
     networks:
       - app-network
+    # command: ["ollama","pull","llava:7b" ]
     # Décommentez pour GPU NVIDIA :
     # deploy:
     #   resources:

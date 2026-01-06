@@ -10,9 +10,6 @@ from ultralytics import YOLO
 from utils.llava_utils import crop_to_base64, describe_with_llava
 
 
-
-
-
 # =========================
 # App
 # =========================
@@ -21,17 +18,40 @@ app = FastAPI(title="YOLO + LLaVA Vision API", version="1.0")
 # =========================
 # YOLOv8 CPU
 # =========================
-#yolo = YOLO("../yolov8n.pt")
-#yolo = YOLO("yolo12n.pt")
+# yolo = YOLO("../yolov8n.pt")
+# yolo = YOLO("yolo12n.pt")
 yolo = YOLO("yolov8s-worldv2.pt")
 
 # Classes personnalisées pour YOLO-World (open-vocabulary)
 CUSTOM_CLASSES = [
-    "pen", "pencil", "marker", "highlighter", "ballpoint pen",
-    "bottle", "cup", "phone", "keyboard", "mouse", "book", "notebook",
-    "scissors", "stapler", "ruler", "eraser", "paper", "card",
-    "watch", "glasses", "keys", "wallet", "bag", "box",
-    "person", "hand", "face", "object"
+    "pen",
+    "pencil",
+    "marker",
+    "highlighter",
+    "ballpoint pen",
+    "bottle",
+    "cup",
+    "phone",
+    "keyboard",
+    "mouse",
+    "book",
+    "notebook",
+    "scissors",
+    "stapler",
+    "ruler",
+    "eraser",
+    "paper",
+    "card",
+    "watch",
+    "glasses",
+    "keys",
+    "wallet",
+    "bag",
+    "box",
+    "person",
+    "hand",
+    "face",
+    "object",
 ]
 yolo.set_classes(CUSTOM_CLASSES)
 
@@ -40,16 +60,15 @@ yolo.set_classes(CUSTOM_CLASSES)
 # =========================
 
 
-
-
-
 # =========================
 # Endpoint
 # =========================
 @app.post("/analyze-image")
 async def analyze_image(
     file: UploadFile = File(...),
-    item_name: Optional[str] = Form(None, description="Nom de l'article pour affiner la description")
+    item_name: Optional[str] = Form(
+        None, description="Nom de l'article pour affiner la description"
+    ),
 ):
     print(f"Received file: {file.filename}, content_type: {file.content_type}")
     if not file.content_type.startswith("image/"):
@@ -90,20 +109,24 @@ async def analyze_image(
             description = describe_with_llava(image_b64, item_name)
             llava_time = time.time() - llava_start
 
-            objects.append({
-                "label": label,
-                "confidence": round(conf, 3),
-                "bbox": [x1, y1, x2, y2],
-                "llava_description": description,
-                "llava_time": round(llava_time, 2)
-            })
+            objects.append(
+                {
+                    "label": label,
+                    "confidence": round(conf, 3),
+                    "bbox": [x1, y1, x2, y2],
+                    "llava_description": description,
+                    "llava_time": round(llava_time, 2),
+                }
+            )
 
     total_time = time.time() - start_total
 
     return {
         "objects": objects,
-        "timings": {
-            "yolo": round(yolo_time, 3),
-            "total": round(total_time, 3)
-        }
+        "timings": {"yolo": round(yolo_time, 3), "total": round(total_time, 3)},
     }
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
