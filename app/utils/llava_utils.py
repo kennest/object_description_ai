@@ -3,7 +3,7 @@ import cv2
 import base64
 from langchain_core.messages import HumanMessage
 from utils.prompts import LLAVA_PROMPT, LLAVA_PROMPT_WITH_ITEM
-
+import logging
 from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
 
@@ -14,8 +14,16 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
 MODEL = os.getenv("MODEL", "llava:13b")
 
 llava = ChatOllama(base_url=OLLAMA_HOST, model=MODEL, temperature=0.1)
-
-
+# =========================
+# Configuration du logging
+# =========================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger(__name__)
+logger.info(f"📂  Modèle (LLM): {MODEL}")
 # =========================
 # Utils
 # =========================
