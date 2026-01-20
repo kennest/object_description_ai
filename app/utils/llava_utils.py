@@ -2,7 +2,7 @@ import os
 import cv2
 import base64
 from langchain_core.messages import HumanMessage
-from utils.prompts import LLAVA_PROMPT, LLAVA_PROMPT_WITH_ITEM
+from app.utils.prompts import LLAVA_PROMPT, LLAVA_PROMPT_WITH_ITEM
 import logging
 from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
