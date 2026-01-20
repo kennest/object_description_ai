@@ -10,7 +10,7 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
 
 llava = ChatOllama(
     base_url=OLLAMA_HOST,
-    model="llava:7b",
+    model="llava:13b",
     temperature=0.1
 )
 # =========================
