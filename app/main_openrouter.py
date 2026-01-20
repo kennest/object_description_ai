@@ -78,6 +78,30 @@ def image_to_base64(image: Image.Image) -> str:
     return b64_str
 
 
+def parse_json_response(response: str) -> dict:
+    """Extrait et parse le JSON d'une réponse qui peut contenir du markdown"""
+    # Nettoyer la réponse
+    cleaned = response.strip()
+    
+    # Supprimer les blocs markdown ```json ... ```
+    if "```json" in cleaned:
+        start = cleaned.find("```json") + 7
+        end = cleaned.rfind("```")
+        if end > start:
+            cleaned = cleaned[start:end].strip()
+    elif "```" in cleaned:
+        start = cleaned.find("```") + 3
+        end = cleaned.rfind("```")
+        if end > start:
+            cleaned = cleaned[start:end].strip()
+    
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError as e:
+        logger.warning(f"⚠️ Impossible de parser le JSON: {e}")
+        return {"raw_response": response}
+
+
 # =========================
 # App
 # =========================
@@ -176,6 +200,9 @@ async def analyze_image(
     logger.info(f"✅ Réponse reçue en {api_time:.3f}s")
     logger.debug(f"Description: {description[:200]}..." if len(description) > 200 else f"Description: {description}")
 
+    # Parser le JSON de la réponse
+    description_json = parse_json_response(description)
+
     total_time = time.time() - start_total
     logger.info(f"🏁 Requête terminée en {total_time:.3f}s")
     logger.info("=" * 50)
@@ -185,7 +212,7 @@ async def analyze_image(
         "item_searched": item_name,
         "model": MODEL,
         "original_size": original_size,
-        "description": json.loads(description),
+        "description": description_json,
         "timings": {
             "preprocessing": round(preprocess_time, 3),
             "api_inference": round(api_time, 3),
