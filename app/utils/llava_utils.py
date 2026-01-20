@@ -5,14 +5,17 @@ from langchain_core.messages import HumanMessage
 from utils.prompts import LLAVA_PROMPT, LLAVA_PROMPT_WITH_ITEM
 
 from langchain_ollama import ChatOllama
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement
+load_dotenv()
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+MODEL = os.getenv("MODEL", "llava:13b")
 
-llava = ChatOllama(
-    base_url=OLLAMA_HOST,
-    model="llava:13b",
-    temperature=0.1
-)
+llava = ChatOllama(base_url=OLLAMA_HOST, model=MODEL, temperature=0.1)
+
+
 # =========================
 # Utils
 # =========================
@@ -31,13 +34,16 @@ def describe_with_llava(image_base64, item_name: str = None):
         prompt = LLAVA_PROMPT_WITH_ITEM.format(item_name=item_name)
     else:
         prompt = LLAVA_PROMPT
-    
+
     message = HumanMessage(
         content=[
             {"type": "text", "text": prompt},
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
+            {
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
+            },
         ]
     )
-    #print("LLaVA message:", message.content[0]['text'][:100], "...")  # Print only the first 100 characters of the text part
-    response = llava.invoke([message])  
+    # print("LLaVA message:", message.content[0]['text'][:100], "...")  # Print only the first 100 characters of the text part
+    response = llava.invoke([message])
     return response.content

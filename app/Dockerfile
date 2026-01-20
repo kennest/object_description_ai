@@ -17,8 +17,6 @@ RUN apt-get update --fix-missing && \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create Ultralytics config directory
-RUN mkdir -p /tmp/Ultralytics && chmod 777 /tmp/Ultralytics
 
 # Copy application code
 COPY . .
