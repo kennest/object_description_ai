@@ -1,18 +1,21 @@
 import io
-import base64
-import json
+
 import time
 import logging
 
 import httpx
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from typing import Optional
-from PIL import Image, ImageEnhance
+from PIL import Image
 from utils.openrouter_utils import (
+    ImageConfig,
     describe_with_openrouter,
     MODEL,
     OPENROUTER_API_KEY,
-    REQUEST_TIMEOUT
+    REQUEST_TIMEOUT,
+    image_to_base64,
+    parse_json_response,
+    preprocess_image
 )
 
 
@@ -25,81 +28,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 logger = logging.getLogger(__name__)
-
-
-# =========================
-# Configuration
-# =========================
-class ImageConfig:
-    """Configuration pour le pré-traitement d'image"""
-    # Pré-traitement
-    ENHANCE_CONTRAST = True
-    CONTRAST_FACTOR = 1.2
-    ENHANCE_SHARPNESS = True  
-    SHARPNESS_FACTOR = 1.3
-    
-    # Taille max pour optimiser l'envoi
-    MAX_IMAGE_SIZE = 1024
-
-
-def preprocess_image(image: Image.Image, config: ImageConfig) -> Image.Image:
-    """Pré-traitement pour améliorer la qualité de l'image"""
-    logger.debug(f"Pré-traitement image - Taille originale: {image.size}")
-    enhanced = image.copy()
-    
-    # Redimensionner si trop grande
-    if max(enhanced.size) > config.MAX_IMAGE_SIZE:
-        old_size = enhanced.size
-        enhanced.thumbnail((config.MAX_IMAGE_SIZE, config.MAX_IMAGE_SIZE), Image.Resampling.LANCZOS)
-        logger.info(f"📐 Image redimensionnée: {old_size} → {enhanced.size}")
-    
-    # Amélioration du contraste
-    if config.ENHANCE_CONTRAST:
-        enhancer = ImageEnhance.Contrast(enhanced)
-        enhanced = enhancer.enhance(config.CONTRAST_FACTOR)
-        logger.debug(f"Contraste amélioré (facteur: {config.CONTRAST_FACTOR})")
-    
-    # Amélioration de la netteté
-    if config.ENHANCE_SHARPNESS:
-        enhancer = ImageEnhance.Sharpness(enhanced)
-        enhanced = enhancer.enhance(config.SHARPNESS_FACTOR)
-        logger.debug(f"Netteté améliorée (facteur: {config.SHARPNESS_FACTOR})")
-    
-    logger.info("✅ Pré-traitement terminé")
-    return enhanced
-
-
-def image_to_base64(image: Image.Image) -> str:
-    """Convertit une image PIL en base64"""
-    buffer = io.BytesIO()
-    image.save(buffer, format="PNG")
-    b64_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
-    logger.debug(f"Image encodée en base64 ({len(b64_str)} caractères)")
-    return b64_str
-
-
-def parse_json_response(response: str) -> dict:
-    """Extrait et parse le JSON d'une réponse qui peut contenir du markdown"""
-    # Nettoyer la réponse
-    cleaned = response.strip()
-    
-    # Supprimer les blocs markdown ```json ... ```
-    if "```json" in cleaned:
-        start = cleaned.find("```json") + 7
-        end = cleaned.rfind("```")
-        if end > start:
-            cleaned = cleaned[start:end].strip()
-    elif "```" in cleaned:
-        start = cleaned.find("```") + 3
-        end = cleaned.rfind("```")
-        if end > start:
-            cleaned = cleaned[start:end].strip()
-    
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError as e:
-        logger.warning(f"⚠️ Impossible de parser le JSON: {e}")
-        return {"raw_response": response}
 
 
 # =========================
